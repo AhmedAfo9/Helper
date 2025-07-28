@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جاري التنزيل</title>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>جاري تجهيز الملف...</h1>
+        <p id="status">إذا لم يبدأ التحميل تلقائياً، قد تكون البيانات كبيرة جداً أو الرابط غير صحيح.</p>
+    </div>
+    <script>
+        window.onload = function() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const dataStr = params.get('data');
+                const fileName = params.get('filename') || 'download';
+                const fileType = params.get('type') || 'application/json;charset=utf-8';
+
+                if (dataStr) {
+                    let blob;
+                    if (fileType.startsWith('image/')) {
+                        // حالة خاصة للصور لأن البيانات مشفرة base64
+                        const byteCharacters = atob(decodeURIComponent(dataStr));
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        blob = new Blob([byteArray], { type: fileType });
+                    } else {
+                        // للحالات العادية (JSON, TXT)
+                        const decodedData = decodeURIComponent(dataStr);
+                        blob = new Blob([decodedData], { type: fileType });
+                    }
+                    
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = fileName;
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    document.getElementById('status').textContent = "تم بدء تحميل الملف بنجاح!";
+                    setTimeout(() => window.close(), 2000);
+                } else {
+                    document.getElementById('status').textContent = "خطأ: لا توجد بيانات في الرابط.";
+                }
+            } catch (e) {
+                document.getElementById('status').textContent = "حدث خطأ: " + e.message;
+            }
+        };
+    </script>
+</body>
+</html>
