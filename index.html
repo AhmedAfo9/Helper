@@ -21,8 +21,9 @@
         .app-container {
             display: flex;
             flex-direction: column;
-            height: 100vh; /* ارتفاع كامل للشاشة */
-            max-height: 100vh; /* ضمان عدم تجاوز الارتفاع */
+            /* استخدام متغير CSS لارتفاع التطبيق ليتكيف مع شاشات الجوال */
+            height: var(--app-height); 
+            max-height: var(--app-height); /* ضمان عدم تجاوز الارتفاع */
         }
         /* المحتوى الرئيسي القابل للتمرير */
         main {
@@ -95,7 +96,6 @@
             width: 100%;
             box-sizing: border-box;
             padding: 1rem; /* Add some padding for content */
-            /* Removed flex centering and height to allow natural flow within main */
         }
         #quiz-container {
             width: 100%; /* Ensure quiz container takes full width */
@@ -109,7 +109,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: var(--app-height); /* استخدام المتغير هنا أيضاً */
             background: linear-gradient(to bottom right, #6366f1, #a855f7); /* تدرج لوني جذاب */
             display: flex;
             justify-content: center;
@@ -148,7 +148,7 @@
     <!-- Splash Screen -->
     <div id="splash-screen">
         <div class="splash-content">
-            <h1 class="text-5xl font-bold mb-4">مُعينك في الفارسية</h1>
+ 
             <p class="text-2xl font-semibold">بواسطة: أحمد فلاح</p>
         </div>
     </div>
@@ -158,7 +158,7 @@
         <!-- Header (Fixed) -->
         <header class="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-4 text-center shadow-lg flex-shrink-0">
             <h1 class="text-2xl font-bold tracking-wide">مُعينك في الفارسية</h1>
-            <p class="text-sm opacity-90 mt-1">تدرب على امتحانك الشفوي بثقة</p>
+            <p class="text-sm opacity-90 mt-1">ᵇʸ ᵃʰᵐᵉᵈ ᶠᵃˡᵃʰ</p>
         </header>
 
         <!-- Main Content (Scrollable) -->
@@ -205,6 +205,17 @@
     </div>
 
     <script>
+        // Function to set the --app-height CSS variable
+        const setAppHeight = () => {
+            const doc = document.documentElement;
+            doc.style.setProperty('--app-height', `${window.innerHeight}px`);
+        };
+
+        // Call it once on load
+        setAppHeight();
+        // Call it again on resize events to handle dynamic changes (e.g., keyboard appearing/disappearing)
+        window.addEventListener('resize', setAppHeight);
+
         document.addEventListener('DOMContentLoaded', () => {
             // --- DATA ---
             const combinedQuestions = [
@@ -598,15 +609,15 @@
                     }
 
                     // If not enough unique wrong options, fill with duplicates from available wrong options
-                    // Or, if there are very few total options, just return what's available
+                    // This ensures we always have 3 options if possible, even if some are repeated
                     if (uniqueWrongOptions.size < count && potentialWrong.length > 0) {
                         while (uniqueWrongOptions.size < count) {
                             uniqueWrongOptions.add(potentialWrong[Math.floor(Math.random() * potentialWrong.length)]);
                         }
                     } else if (potentialWrong.length === 0 && count > 0) {
                         // Edge case: no wrong options available (e.g., only one verb in the list)
-                        // In a real app, you might want to skip this question or show fewer options.
-                        // For now, we'll just return an empty array for wrong options.
+                        // In this scenario, we might just return an empty array or fewer options.
+                        // For now, we'll return an empty array, which means only the correct answer will be displayed.
                         return [];
                     }
 
